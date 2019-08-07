@@ -17,6 +17,14 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "ng-table-chart": [
+        "dist/ng-table-chart"
+      ],
+      "ng-table-chart/*": [
+        "dist/ng-table-chart/*"
+      ]
+    }
   }
 }
