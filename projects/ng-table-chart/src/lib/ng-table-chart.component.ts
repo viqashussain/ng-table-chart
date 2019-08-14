@@ -10,10 +10,17 @@ export class NgTableChartComponent implements OnInit {
   constructor() { }
 
   table;
+  selectedColumns;
 
   isMouseDown = false;
   startRowIndex = null;
   startCellIndex = null;
+
+  startOfSelectedRowIndex: number;
+  startOfSelectedColumnIndex: number;
+
+  endOfSelectedRowIndex: number;
+  endOfSelectedColumnIndex: number;
 
   ngOnInit() {
 
@@ -72,27 +79,43 @@ export class NgTableChartComponent implements OnInit {
     });
 
 
-    // $(document).mouseup(function() {
-    //   this.isMouseDown = false;
-    // });
-
     document.addEventListener('mouseup', e => {
       this.isMouseDown = false;
-    });
 
-    // console.log(that.table.querySelectorAll('td'))
+      console.log(this.startOfSelectedRowIndex)
+      console.log(this.startOfSelectedColumnIndex)
+
+      this.calculateSelectedFields();
+    });
 
   }
 
+  calculateSelectedFields() {
+    let selectedData = [];
+
+    for (var currentColumn = this.startOfSelectedColumnIndex; currentColumn <= this.endOfSelectedColumnIndex; currentColumn++) {
+
+      selectedData.push({ key: currentColumn, values: [], totalCount: 0 });
+      const currentSelectedData = selectedData.find(x => x.key === currentColumn);
+      for (var row = this.startOfSelectedRowIndex + 1; row <= this.endOfSelectedRowIndex + 1; row++) {
+
+        const value = document.querySelector('table').rows[row].cells[currentColumn];
+        currentSelectedData.values.push(value);
+      }
+      currentSelectedData.totalCount = currentSelectedData.values.map(x => {
+        return parseInt(x.textContent);
+      }).reduce((a, b) => a + b);
+    }
+  }
+
   selectTo(cell) {
-    console.log('selectTo')
 
     var row = cell.parentNode;
     var cellIndex = cell.cellIndex;
     var rowIndex = cell.parentNode.rowIndex;
 
-    console.log(cellIndex)
-    console.log(rowIndex)
+    this.endOfSelectedRowIndex = rowIndex - 1;
+    this.endOfSelectedColumnIndex = cellIndex;
 
     var rowStart, rowEnd, cellStart, cellEnd;
 
@@ -112,10 +135,12 @@ export class NgTableChartComponent implements OnInit {
       cellEnd = cellIndex;
     }
 
+    this.startOfSelectedRowIndex = this.startRowIndex - 1;
+    this.startOfSelectedColumnIndex = this.startCellIndex;
+
 
     for (var i = rowStart; i <= rowEnd; i++) {
       var rowCells = eq(i, this.table.querySelectorAll("tr")).querySelectorAll("td");
-      console.log(rowCells)
       for (var j = cellStart; j <= cellEnd; j++) {
         eq(j, rowCells).classList.add("selected");
       }
