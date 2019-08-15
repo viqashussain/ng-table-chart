@@ -91,22 +91,22 @@ export class NgTableChartComponent implements OnInit {
 
     this.graphData = [];
 
+    const table = document.querySelector('table');
     for (var currentColumn = this.startOfSelectedColumnIndex; currentColumn <= this.endOfSelectedColumnIndex; currentColumn++) {
 
-      selectedData.push({ key: currentColumn, values: [], sumOfSelected: 0, sumOfColumn: 0 });
-      const currentSelectedData = selectedData.find(x => x.key === currentColumn);
+      selectedData.push({ key: currentColumn, sumOfSelected: 0, sumOfColumn: 0 });
+      const currentSelectedData = selectedData[selectedData.length - 1];
+      let sumOfSelected = 0;
       for (var row = this.startOfSelectedRowIndex + 1; row <= this.endOfSelectedRowIndex + 1; row++) {
 
-        const td = document.querySelector('table').rows[row].cells[currentColumn];
-        currentSelectedData.values.push(td);
+        const td = table.rows[row].cells[currentColumn];
+        sumOfSelected = sumOfSelected + parseFloat(td.textContent);
       }
-      
-      currentSelectedData.sumOfSelected = currentSelectedData.values.map(x => {
-        return parseInt(x.textContent);
-      }).reduce((a, b) => a + b);
+
+      currentSelectedData.sumOfSelected = sumOfSelected;
 
       for (var r = 1; r <= this.data.length; r++) {
-        const value = document.querySelector('table').rows[r].cells[currentColumn].textContent.trim();
+        const value = table.rows[r].cells[currentColumn].textContent.trim();
         currentSelectedData.sumOfColumn = currentSelectedData.sumOfColumn + parseFloat(value);
       }
 
@@ -124,8 +124,8 @@ export class NgTableChartComponent implements OnInit {
       const element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       element.setAttributeNS(null, 'y', (i * 30).toString());
       element.setAttributeNS(null, 'height', '20');
-      const totalCountPerc = (data.sumOfSelected / data.sumOfColumn) * 100;
-      element.setAttributeNS(null, 'width', totalCountPerc.toString());
+      const totalCountPerc = ((data.sumOfSelected / data.sumOfColumn) * 100) + '%';
+      element.setAttributeNS(null, 'width', totalCountPerc);
       var txt = document.createTextNode("Hello World");
       element.appendChild(txt);
       svg.appendChild(element);
@@ -165,8 +165,9 @@ export class NgTableChartComponent implements OnInit {
     this.startOfSelectedColumnIndex = this.startCellIndex;
 
 
+    const allTrs = this.table.querySelectorAll("tr");
     for (var i = rowStart; i <= rowEnd; i++) {
-      var rowCells = eq(i, this.table.querySelectorAll("tr")).querySelectorAll("td");
+      var rowCells = eq(i, allTrs).querySelectorAll("td");
       for (var j = cellStart; j <= cellEnd; j++) {
         eq(j, rowCells).classList.add("selected");
       }
