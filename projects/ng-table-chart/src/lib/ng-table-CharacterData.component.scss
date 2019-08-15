@@ -2,8 +2,19 @@
   border:1px solid #ccc;
 }
 #table td {
-  padding:50px;
+  padding:5px;
+  border: 1px solid black;
 }
 #table td.selected {
   background-color:#ccc;
+}
+
+.chart rect {
+  fill: steelblue;
+}
+
+.chart text {
+  fill: white;
+  font: 10px sans-serif;
+  text-anchor: end;
 }

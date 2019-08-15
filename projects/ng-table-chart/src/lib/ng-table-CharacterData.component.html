@@ -1,26 +1,21 @@
 <table id="table">
   <thead>
     <tr>
-      <th>ColumnOne</th>
-      <th>ColumnTwo</th>
-      <th>ColumnThree</th>
+      <th *ngFor="let x of columnKeys">{{x}}</th>
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td>1</td>
-      <td>2</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <td>4</td>
-      <td>5</td>
-      <td>6</td>
-    </tr>
-    <tr>
-      <td>7</td>
-      <td>8</td>
-      <td>9</td>
+    <tr *ngFor="let row of data; let i = index">
+      <td *ngFor="let columnKey of columnKeys">
+        {{row[columnKey]}}
+      </td>
     </tr>
   </tbody>
 </table>
+
+<div>
+  <svg id="chart" class="chart" width="500" height="200">
+      <rect y="0" width="300" height="20" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" />
+      <rect y="30" width="300" height="20" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" />
+  </svg>
+</div>

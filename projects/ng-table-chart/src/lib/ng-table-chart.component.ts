@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, Input } from '@angular/core';
 
 @Component({
   selector: 'lib-ng-table-chart',
@@ -8,6 +8,10 @@ import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
 export class NgTableChartComponent implements OnInit {
 
   constructor() { }
+
+  @Input() data;
+
+  columnKeys: string[];
 
   table;
   selectedColumns;
@@ -22,7 +26,11 @@ export class NgTableChartComponent implements OnInit {
   endOfSelectedRowIndex: number;
   endOfSelectedColumnIndex: number;
 
+  graphData: any[] = [];
+
   ngOnInit() {
+
+    this.columnKeys = Object.keys(this.data[0]);
 
     const that = this;
 
@@ -47,7 +55,7 @@ export class NgTableChartComponent implements OnInit {
           }
 
           if (e.shiftKey) {
-            this.selectTo(cell);
+            that.selectTo(cell);
           } else {
             cell.classList.add("selected");
             that.startCellIndex = cell.cellIndex;
@@ -63,18 +71,8 @@ export class NgTableChartComponent implements OnInit {
             that.table.querySelector(".selected").classList.remove('selected') // deselect everything
           }
           that.selectTo(e.target);
-          // this.selectTo($(this));
         });
       });
-      //   .mouseover(function() {
-      //   if (!this.isMouseDown) return;
-      //   that.table.find(".selected").removeClass("selected");
-      //   // this.selectTo($(this));
-      // })
-      //   .bind("selectstart", function() {
-      //   return false;
-      // });
-
 
     });
 
@@ -82,10 +80,8 @@ export class NgTableChartComponent implements OnInit {
     document.addEventListener('mouseup', e => {
       this.isMouseDown = false;
 
-      console.log(this.startOfSelectedRowIndex)
-      console.log(this.startOfSelectedColumnIndex)
-
       this.calculateSelectedFields();
+      this.drawGraph();
     });
 
   }
@@ -93,19 +89,49 @@ export class NgTableChartComponent implements OnInit {
   calculateSelectedFields() {
     let selectedData = [];
 
+    this.graphData = [];
+
     for (var currentColumn = this.startOfSelectedColumnIndex; currentColumn <= this.endOfSelectedColumnIndex; currentColumn++) {
 
-      selectedData.push({ key: currentColumn, values: [], totalCount: 0 });
+      selectedData.push({ key: currentColumn, values: [], sumOfSelected: 0, sumOfColumn: 0 });
       const currentSelectedData = selectedData.find(x => x.key === currentColumn);
       for (var row = this.startOfSelectedRowIndex + 1; row <= this.endOfSelectedRowIndex + 1; row++) {
 
-        const value = document.querySelector('table').rows[row].cells[currentColumn];
-        currentSelectedData.values.push(value);
+        const td = document.querySelector('table').rows[row].cells[currentColumn];
+        currentSelectedData.values.push(td);
       }
-      currentSelectedData.totalCount = currentSelectedData.values.map(x => {
+      
+      currentSelectedData.sumOfSelected = currentSelectedData.values.map(x => {
         return parseInt(x.textContent);
       }).reduce((a, b) => a + b);
+
+      for (var r = 1; r <= this.data.length; r++) {
+        const value = document.querySelector('table').rows[r].cells[currentColumn].textContent.trim();
+        currentSelectedData.sumOfColumn = currentSelectedData.sumOfColumn + parseFloat(value);
+      }
+
+      this.graphData.push(currentSelectedData);
     }
+  }
+
+  drawGraph() {
+    var svg = document.getElementById('chart');
+    while (svg.firstChild) {
+      svg.removeChild(svg.firstChild);
+    }
+    let i = 0;
+    this.graphData.forEach(data => {
+      const element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      element.setAttributeNS(null, 'y', (i * 30).toString());
+      element.setAttributeNS(null, 'height', '20');
+      const totalCountPerc = (data.sumOfSelected / data.sumOfColumn) * 100;
+      element.setAttributeNS(null, 'width', totalCountPerc.toString());
+      var txt = document.createTextNode("Hello World");
+      element.appendChild(txt);
+      svg.appendChild(element);
+
+      i++;
+    });
   }
 
   selectTo(cell) {
