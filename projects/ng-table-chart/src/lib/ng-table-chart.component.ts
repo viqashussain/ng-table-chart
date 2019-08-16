@@ -74,6 +74,7 @@ export class NgTableChartComponent implements OnInit {
           }
           that.selectTo(e.target);
           that.calculateSelectedFields();
+          that.drawGraph();
         });
       });
 
@@ -130,9 +131,20 @@ export class NgTableChartComponent implements OnInit {
     }
     let i = 0;
     this.graphData.forEach(data => {
+
+      const backgroundBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      backgroundBar.setAttributeNS(null, 'y', (i * 30).toString());
+      backgroundBar.setAttributeNS(null, 'height', '20');
+      backgroundBar.setAttributeNS(null, 'width', '100%');
+      backgroundBar.setAttributeNS(null, 'fill', 'red');
+      var txt = document.createTextNode("Hello World");
+      backgroundBar.appendChild(txt);
+      svg.appendChild(backgroundBar);
+
       const element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       element.setAttributeNS(null, 'y', (i * 30).toString());
       element.setAttributeNS(null, 'height', '20');
+      element.setAttributeNS(null, 'fill', 'green');
       const totalCountPerc = ((data.sumOfSelected / data.sumOfColumn) * 100) + '%';
       element.setAttributeNS(null, 'width', totalCountPerc);
       var txt = document.createTextNode("Hello World");
