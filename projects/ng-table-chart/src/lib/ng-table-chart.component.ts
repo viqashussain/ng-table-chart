@@ -73,6 +73,7 @@ export class NgTableChartComponent implements OnInit {
             that.table.querySelector(".selected").classList.remove('selected') // deselect everything
           }
           that.selectTo(e.target);
+          that.calculateSelectedFields();
         });
       });
 
