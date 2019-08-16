@@ -1,21 +1,25 @@
-<table id="table">
-  <thead>
-    <tr>
-      <th *ngFor="let x of columnKeys">{{x}}</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let row of data; let i = index">
-      <td *ngFor="let columnKey of columnKeys">
-        {{row[columnKey]}}
-      </td>
-    </tr>
-  </tbody>
-</table>
+<div id="container">
+  <div>{{sumOfSelectedCells}}</div>
+  <div>{{countOfSelectedCells}}</div>
+  <table id="table">
+    <thead>
+      <tr class="table100-head">
+        <th *ngFor="let x of columnKeys">{{x}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of data; let i = index">
+        <td *ngFor="let columnKey of columnKeys">
+          {{row[columnKey]}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
-<div>
-  <svg id="chart" class="chart" width="500" height="200">
+  <div>
+    <svg id="chart" class="chart" width="500" height="200">
       <rect y="0" width="300" height="20" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" />
       <rect y="30" width="300" height="20" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" />
-  </svg>
+    </svg>
+  </div>
 </div>

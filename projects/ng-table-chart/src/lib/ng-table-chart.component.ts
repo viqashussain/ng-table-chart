@@ -26,6 +26,9 @@ export class NgTableChartComponent implements OnInit {
   endOfSelectedRowIndex: number;
   endOfSelectedColumnIndex: number;
 
+  sumOfSelectedCells: number = 0;
+  countOfSelectedCells: number = 0;
+
   graphData: any[] = [];
 
   ngOnInit() {
@@ -42,7 +45,6 @@ export class NgTableChartComponent implements OnInit {
       alltds.forEach(td => {
 
         td.addEventListener('mousedown', function (e) {
-          that.table = document.getElementById('table');
           that.isMouseDown = true;
           var cell = e.target;
           // var cell = $(this);
@@ -91,6 +93,9 @@ export class NgTableChartComponent implements OnInit {
 
     this.graphData = [];
 
+    this.sumOfSelectedCells = 0;
+    this.countOfSelectedCells = 0;
+
     const table = document.querySelector('table');
     for (var currentColumn = this.startOfSelectedColumnIndex; currentColumn <= this.endOfSelectedColumnIndex; currentColumn++) {
 
@@ -101,6 +106,9 @@ export class NgTableChartComponent implements OnInit {
 
         const td = table.rows[row].cells[currentColumn];
         sumOfSelected = sumOfSelected + parseFloat(td.textContent);
+
+        this.sumOfSelectedCells = this.sumOfSelectedCells + parseFloat(td.textContent);
+        this.countOfSelectedCells++;
       }
 
       currentSelectedData.sumOfSelected = sumOfSelected;
