@@ -98,6 +98,18 @@ export class NgTableChartComponent implements OnInit {
     this.sumOfSelectedCells = 0;
     this.countOfSelectedCells = 0;
 
+    if (this.endOfSelectedColumnIndex < this.startOfSelectedColumnIndex) {
+      const temp = this.endOfSelectedColumnIndex;
+      this.endOfSelectedColumnIndex = this.startOfSelectedColumnIndex;
+      this.startOfSelectedColumnIndex = temp;
+    }
+
+    if (this.endOfSelectedRowIndex < this.startOfSelectedRowIndex) {
+      const temp = this.endOfSelectedRowIndex;
+      this.endOfSelectedRowIndex = this.startOfSelectedRowIndex;
+      this.startOfSelectedRowIndex = temp;
+    }
+
     const table = document.querySelector('table');
     for (var currentColumn = this.startOfSelectedColumnIndex; currentColumn <= this.endOfSelectedColumnIndex; currentColumn++) {
 
