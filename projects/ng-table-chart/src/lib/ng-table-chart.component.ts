@@ -70,7 +70,9 @@ export class NgTableChartComponent implements OnInit {
         td.addEventListener('mouseover', function (e) {
           if (!that.isMouseDown) return;
           if (that.table.querySelector(".selected")) {
-            that.table.querySelector(".selected").classList.remove('selected') // deselect everything
+            that.table.querySelectorAll(".selected").forEach(element => {
+              element.classList.remove('selected') // deselect everything      
+            });
           }
           that.selectTo(e.target);
           that.calculateSelectedFields();
