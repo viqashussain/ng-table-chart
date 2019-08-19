@@ -41,13 +41,41 @@ export class NgTableChartComponent implements OnInit {
       that.table = document.getElementById('table');
 
       var alltds = that.table.querySelectorAll('td');
+      var allths = that.table.querySelectorAll('th');
+
+      allths.forEach(th => {
+
+        th.addEventListener('click', function (e) {
+          var cell = e.target;
+
+          that.table.querySelectorAll(".selected").forEach(element => {
+            element.classList.remove('selected') // deselect everything      
+          });
+
+          that.startCellIndex = cell.cellIndex;
+          that.startRowIndex = 1;
+          let lastRow = that.table.rows[that.table.rows.length - 1];
+          let lastCell = lastRow.cells[cell.cellIndex];
+
+          that.selectTo(lastCell);
+
+          // if (e.shiftKey) {
+          //   that.selectTo(cell);
+          // } else {
+          //   cell.classList.add("selected");
+          //   that.startCellIndex = cell.cellIndex;
+          //   that.startRowIndex = cell.parentNode.rowIndex;
+          // }
+
+          return false;
+        })
+      });
 
       alltds.forEach(td => {
 
         td.addEventListener('mousedown', function (e) {
           that.isMouseDown = true;
-          var cell = e.target;
-          // var cell = $(this);
+          const cell = e.target;
 
           if (that.table.querySelector(".selected")) {
             that.table.querySelectorAll(".selected").forEach(element => {
@@ -75,8 +103,6 @@ export class NgTableChartComponent implements OnInit {
             });
           }
           that.selectTo(e.target);
-          that.calculateSelectedFields();
-          that.drawGraph();
         });
       });
 
@@ -85,9 +111,6 @@ export class NgTableChartComponent implements OnInit {
 
     document.addEventListener('mouseup', e => {
       this.isMouseDown = false;
-
-      this.calculateSelectedFields();
-      this.drawGraph();
     });
 
   }
@@ -171,7 +194,6 @@ export class NgTableChartComponent implements OnInit {
 
   selectTo(cell) {
 
-    var row = cell.parentNode;
     var cellIndex = cell.cellIndex;
     var rowIndex = cell.parentNode.rowIndex;
 
@@ -207,6 +229,9 @@ export class NgTableChartComponent implements OnInit {
         eq(j, rowCells).classList.add("selected");
       }
     }
+
+    this.calculateSelectedFields();
+    this.drawGraph();
   }
 
 }
