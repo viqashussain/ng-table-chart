@@ -52,20 +52,19 @@ export class NgTableChartComponent implements OnInit {
             element.classList.remove('selected') // deselect everything      
           });
 
-          that.startCellIndex = cell.cellIndex;
-          that.startRowIndex = 1;
-          let lastRow = that.table.rows[that.table.rows.length - 1];
-          let lastCell = lastRow.cells[cell.cellIndex];
+          if (e.shiftKey) {
+            let lastRow = that.table.rows[that.table.rows.length - 1];
+            let lastCell = lastRow.cells[cell.cellIndex];
 
-          that.selectTo(lastCell);
+            that.selectTo(lastCell);
+          } else {
+            that.startCellIndex = cell.cellIndex;
+            that.startRowIndex = 1;
+            let lastRow = that.table.rows[that.table.rows.length - 1];
+            let lastCell = lastRow.cells[cell.cellIndex];
 
-          // if (e.shiftKey) {
-          //   that.selectTo(cell);
-          // } else {
-          //   cell.classList.add("selected");
-          //   that.startCellIndex = cell.cellIndex;
-          //   that.startRowIndex = cell.parentNode.rowIndex;
-          // }
+            that.selectTo(lastCell);
+          }
 
           return false;
         })
