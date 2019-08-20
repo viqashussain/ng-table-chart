@@ -15,6 +15,7 @@ export class NgTableChartComponent implements OnInit {
 
   table;
   selectedColumns;
+  sumOfColumns: number[] = [];
 
   isMouseDown = false;
   startRowIndex = null;
@@ -38,6 +39,17 @@ export class NgTableChartComponent implements OnInit {
     const that = this;
 
     document.addEventListener("DOMContentLoaded", function () {
+
+      that.columnKeys.forEach(columnKey => {
+        let sumOfColumn = 0;
+        for (var r = 0; r < that.data.length; r++) {
+          const value = that.data[r][columnKey];
+          sumOfColumn = sumOfColumn + parseFloat(value);
+        }
+  
+        that.sumOfColumns.push(sumOfColumn);
+      });
+
       that.table = document.getElementById('table');
 
       var alltds = that.table.querySelectorAll('td');
@@ -46,10 +58,11 @@ export class NgTableChartComponent implements OnInit {
       allths.forEach(th => {
 
         th.addEventListener('click', function (e) {
+          var t0 = performance.now();
           var cell = e.target;
 
           that.table.querySelectorAll(".selected").forEach(element => {
-            element.classList.remove('selected') // deselect everything      
+            element.className = '';
           });
 
           if (e.shiftKey) {
@@ -65,7 +78,8 @@ export class NgTableChartComponent implements OnInit {
 
             that.selectTo(lastCell);
           }
-
+          var t1 = performance.now();
+          console.log("Call to click took " + (t1 - t0) + " milliseconds.")
           return false;
         })
       });
@@ -78,7 +92,7 @@ export class NgTableChartComponent implements OnInit {
 
           if (that.table.querySelector(".selected")) {
             that.table.querySelectorAll(".selected").forEach(element => {
-              element.classList.remove('selected') // deselect everything      
+              element.className = '';
             });
 
           }
@@ -86,7 +100,7 @@ export class NgTableChartComponent implements OnInit {
           if (e.shiftKey) {
             that.selectTo(cell);
           } else {
-            cell.classList.add("selected");
+            cell.className = 'selected';
             that.startCellIndex = cell.cellIndex;
             that.startRowIndex = cell.parentNode.rowIndex;
           }
@@ -98,7 +112,7 @@ export class NgTableChartComponent implements OnInit {
           if (!that.isMouseDown) return;
           if (that.table.querySelector(".selected")) {
             that.table.querySelectorAll(".selected").forEach(element => {
-              element.classList.remove('selected') // deselect everything      
+              element.className = '';
             });
           }
           that.selectTo(e.target);
@@ -107,7 +121,6 @@ export class NgTableChartComponent implements OnInit {
 
     });
 
-
     document.addEventListener('mouseup', e => {
       this.isMouseDown = false;
     });
@@ -115,6 +128,7 @@ export class NgTableChartComponent implements OnInit {
   }
 
   calculateSelectedFields() {
+    var t1 = performance.now();
     let selectedData = [];
 
     this.graphData = [];
@@ -134,7 +148,7 @@ export class NgTableChartComponent implements OnInit {
       this.startOfSelectedRowIndex = temp;
     }
 
-    const table = document.querySelector('table');
+    const allTrs = document.getElementsByTagName('tr');
     for (var currentColumn = this.startOfSelectedColumnIndex; currentColumn <= this.endOfSelectedColumnIndex; currentColumn++) {
 
       selectedData.push({ key: currentColumn, sumOfSelected: 0, sumOfColumn: 0 });
@@ -142,7 +156,7 @@ export class NgTableChartComponent implements OnInit {
       let sumOfSelected = 0;
       for (var row = this.startOfSelectedRowIndex + 1; row <= this.endOfSelectedRowIndex + 1; row++) {
 
-        const td = table.rows[row].cells[currentColumn];
+        const td = allTrs[row].cells[currentColumn];
         sumOfSelected = sumOfSelected + parseFloat(td.textContent);
 
         this.sumOfSelectedCells = this.sumOfSelectedCells + parseFloat(td.textContent);
@@ -151,13 +165,13 @@ export class NgTableChartComponent implements OnInit {
 
       currentSelectedData.sumOfSelected = sumOfSelected;
 
-      for (var r = 1; r <= this.data.length; r++) {
-        const value = table.rows[r].cells[currentColumn].textContent.trim();
-        currentSelectedData.sumOfColumn = currentSelectedData.sumOfColumn + parseFloat(value);
-      }
+      currentSelectedData.sumOfColumn = this.sumOfColumns[currentColumn];
 
       this.graphData.push(currentSelectedData);
     }
+
+    var t2 = performance.now();
+    console.log("Call to calculateSelectedFields " + (t2 - t1) + " milliseconds.")
   }
 
   drawGraph() {
@@ -193,6 +207,8 @@ export class NgTableChartComponent implements OnInit {
 
   selectTo(cell) {
 
+    var t0 = performance.now();
+
     var cellIndex = cell.cellIndex;
     var rowIndex = cell.parentNode.rowIndex;
 
@@ -221,13 +237,16 @@ export class NgTableChartComponent implements OnInit {
     this.startOfSelectedColumnIndex = this.startCellIndex;
 
 
-    const allTrs = this.table.querySelectorAll("tr");
+    const allTrs = document.getElementsByTagName('tr');
     for (var i = rowStart; i <= rowEnd; i++) {
       var rowCells = eq(i, allTrs).querySelectorAll("td");
       for (var j = cellStart; j <= cellEnd; j++) {
-        eq(j, rowCells).classList.add("selected");
+        eq(j, rowCells).className = 'selected';
       }
     }
+
+    var t1 = performance.now();
+    console.log("Call to selectTo took " + (t1 - t0) + " milliseconds.")
 
     this.calculateSelectedFields();
     this.drawGraph();
