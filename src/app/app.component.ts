@@ -9,7 +9,7 @@ export class AppComponent implements OnInit {
   title = 'ng-table-charts';
 
   data: any[] = [];
-  readonly recordsCount = 10000;
+  readonly recordsCount = 100;
 
   ngOnInit()
   {

@@ -40,13 +40,20 @@ export class NgTableChartComponent implements OnInit {
 
     document.addEventListener("DOMContentLoaded", function () {
 
+      document.getElementById('table').addEventListener('mousewheel', function (event) {
+        event.preventDefault();
+        return that.onMouseWheel(event);
+      });
+
+      that.updateLayout();
+
       that.columnKeys.forEach(columnKey => {
         let sumOfColumn = 0;
         for (var r = 0; r < that.data.length; r++) {
           const value = that.data[r][columnKey];
           sumOfColumn = sumOfColumn + parseFloat(value);
         }
-  
+
         that.sumOfColumns.push(sumOfColumn);
       });
 
@@ -250,6 +257,168 @@ export class NgTableChartComponent implements OnInit {
 
     this.calculateSelectedFields();
     this.drawGraph();
+  }
+
+  $table: HTMLElement = null;
+  $tbody = null;
+  itemHeight = -1;
+  processedItems = {};
+  yPosition = 0;
+  totalItems: any[] = [];
+  $scrollbar = document.getElementById('scrollbar');
+
+  updateLayout() {
+
+    this.$table = document.getElementById('table');
+    this.$tbody = document.getElementById('tbody');
+
+    if (this.data.length > 0) {
+
+      var height = this.$table.scrollHeight;
+
+      // this.$tbody.detach();
+
+      var i = -1;
+      var startPosition = Math.ceil(this.yPosition / this.itemHeight);
+      var offset = -(this.yPosition % this.itemHeight);
+
+      // this.setItemPosition(this.$tbody, 0, -this.yPosition);
+      this.processedItems = {};
+
+      while (((i) * this.itemHeight) < 2 * (height + (2 * this.itemHeight))) {
+
+        var index = Math.max(startPosition + i, 0);
+        index = Math.min(index, this.data.length);
+
+        var item = this.getItemAtIndex(index);
+        this.totalItems.push(item);
+
+        this.processedItems[index.toString()] = item;
+        // this.setItemPosition(item, 0, ((startPosition + i) * this.itemHeight));
+
+        //if not attached
+        if (item.parentElement === null) {
+          this.$tbody.append(item);
+
+          if (this.itemHeight <= 0) {
+            this.$table.append(this.$tbody);
+            this.itemHeight = item.scrollHeight;
+            this.updateLayout();
+            return;
+          }
+        }
+        i++;
+      }
+
+      // this.cleanupListItems(true);
+      // if ( ignoreScrollbar !== true ) {
+      this.updateScrollBar();
+      // }
+      // this.$scrollbar.before(this.$tbody);
+    }
+  }
+
+  SCROLLBAR_BORDER = 1;
+  SCROLLBAR_MIN_SIZE = 10;
+
+  updateScrollBar() {
+    var height = this.$table.clientHeight;
+    var maxScrollbarHeight = this.$table.clientHeight - (2 * this.SCROLLBAR_BORDER);
+    var maxItemsHeight = (this.data.length) * this.itemHeight;
+    var targetHeight = Math.min(maxScrollbarHeight / maxItemsHeight, 1) * maxScrollbarHeight;
+    var actualHeight = Math.max(targetHeight, this.SCROLLBAR_MIN_SIZE);
+
+    var scrollPosition = this.SCROLLBAR_BORDER + ((this.yPosition / (maxItemsHeight - height)) * (maxScrollbarHeight - actualHeight));
+    if (scrollPosition < this.SCROLLBAR_BORDER) {
+
+      actualHeight = Math.max(actualHeight + scrollPosition, 0);
+      scrollPosition = this.SCROLLBAR_BORDER;
+    }
+    else if (scrollPosition > (height - actualHeight)) {
+      actualHeight = Math.min(actualHeight, (height - (scrollPosition + this.SCROLLBAR_BORDER)));
+    }
+
+    // this.$scrollbar.height(actualHeight);
+    var parent = document.getElementById('scrollbar').parentElement;
+
+    if ((this.data.length * this.itemHeight) <= this.$table.clientHeight) {
+      if (parent) {
+        this.$scrollbar.remove();
+      }
+    }
+    else {
+      if (parent) {
+        this.$table.append(this.$scrollbar);
+      }
+      document.getElementById('scrollbar').style.top = scrollPosition.toString();
+    }
+
+  }
+
+
+  getItemAtIndex(i) {
+    let listItems = this.data;
+    var item;
+    if (this.data === listItems) {
+      item = document.createElement('tr');
+      const td = document.createElement('td');
+      td.innerHTML = listItems[i].columnA;
+      item.appendChild(td);
+    }
+    else if (i !== undefined) {
+      var iString = i.toString();
+
+      if (listItems[iString] === null || listItems[iString] === undefined) {
+        item = document.createElement('tr');
+        listItems[iString] = item;
+      }
+      else {
+        item = listItems[i];
+      }
+      if (i >= 0 && i < this.data.length) {
+        var data = this.data[i];
+        // var label = this.labelFunction ? this.labelFunction(data) : data.toString();
+        // item.html(label);
+      }
+    }
+    if (item !== null && item !== undefined) {
+      // item.attr("list-index", i);
+    }
+    return item;
+  }
+
+  onMouseWheel(event) {
+    // clearTimeout(this.cleanupTimeout);
+
+    //only concerned about vertical scroll
+    //scroll wheel logic from: https://github.com/brandonaaron/jquery-mousewheel/blob/master/jquery.mousewheel.js
+    var orgEvent = event;
+    var delta = 0;
+
+    // Old school scrollwheel delta
+    if (orgEvent.wheelDelta) { delta = orgEvent.wheelDelta / 120; }
+    if (orgEvent.detail) { delta = -orgEvent.detail / 3; }
+
+    // Webkit
+    if (orgEvent.wheelDeltaY !== undefined) { delta = orgEvent.wheelDeltaY / 120; }
+
+    this.yPosition -= (delta * this.itemHeight);
+
+
+    //limit the mouse wheel scroll area
+    var maxPosition = ((this.data.length) * this.itemHeight) - this.$table.clientHeight;
+    if (this.yPosition > maxPosition) {
+      this.yPosition = maxPosition;
+    }
+    if (this.yPosition < 0) {
+      this.yPosition = 0;
+    }
+
+    var self = this;
+    this.updateLayout();
+    // this.cleanupTimeout = setTimeout(function () { self.cleanupListItems(); }, 100);
+
+    return false;
   }
 
 }

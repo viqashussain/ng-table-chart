@@ -8,13 +8,15 @@
           <th *ngFor="let x of columnKeys">{{x}}</th>
         </tr>
       </thead>
-      <tbody>
-        <tr *ngFor="let row of data; let i = index">
+      <tbody id="tbody">
+        <!-- <tr *ngFor="let row of data; let i = index">
           <td *ngFor="let columnKey of columnKeys">
             {{row[columnKey]}}
           </td>
-        </tr>
+        </tr> -->
+        <tr></tr> 
       </tbody>
+      <div id="scrollbar"></div>
     </table>
   </div>
 
