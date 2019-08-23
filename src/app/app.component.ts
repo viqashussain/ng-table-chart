@@ -14,10 +14,15 @@ export class AppComponent implements OnInit {
   ngOnInit()
   {
     for (let i = 0; i < this.recordsCount; i++) {
+      // const record = {
+      //   columnA: Math.floor(Math.floor(Math.random() * 1000000)),
+      //   columnB: Math.floor(Math.floor(Math.random() * 1000000)),
+      //   columnC: Math.floor(Math.floor(Math.random() * 1000000))
+      // }
       const record = {
-        columnA: Math.floor(Math.floor(Math.random() * 1000000)),
-        columnB: Math.floor(Math.floor(Math.random() * 1000000)),
-        columnC: Math.floor(Math.floor(Math.random() * 1000000))
+        columnA: `${i}A`,
+        columnB: `${i}B`,
+        columnC: `${i}C`
       }
       this.data.push(record);
     }

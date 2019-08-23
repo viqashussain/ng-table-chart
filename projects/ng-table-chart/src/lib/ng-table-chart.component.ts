@@ -41,7 +41,7 @@ export class NgTableChartComponent implements OnInit {
     document.addEventListener("DOMContentLoaded", function () {
 
       document.getElementById('table').addEventListener('mousewheel', function (event) {
-        event.preventDefault();
+        // event.preventDefault();
         return that.onMouseWheel(event);
       });
 
@@ -275,6 +275,7 @@ export class NgTableChartComponent implements OnInit {
     if (this.data.length > 0) {
 
       var height = this.$table.scrollHeight;
+      // var height = this.$table.scrollHeight;
 
       // this.$tbody.detach();
 
@@ -285,10 +286,10 @@ export class NgTableChartComponent implements OnInit {
       // this.setItemPosition(this.$tbody, 0, -this.yPosition);
       this.processedItems = {};
 
-      while (((i) * this.itemHeight) < 2 * (height + (2 * this.itemHeight))) {
+      while ((i * this.itemHeight) < 2 * (height + (2 * this.itemHeight))) {
 
         var index = Math.max(startPosition + i, 0);
-        index = Math.min(index, this.data.length);
+        index = Math.min(index, this.data.length -1 );
 
         var item = this.getItemAtIndex(index);
         this.totalItems.push(item);
@@ -302,7 +303,7 @@ export class NgTableChartComponent implements OnInit {
 
           if (this.itemHeight <= 0) {
             this.$table.append(this.$tbody);
-            this.itemHeight = item.scrollHeight;
+            this.itemHeight = 23;
             this.updateLayout();
             return;
           }
@@ -310,7 +311,7 @@ export class NgTableChartComponent implements OnInit {
         i++;
       }
 
-      // this.cleanupListItems(true);
+      this.cleanupListItems(true);
       // if ( ignoreScrollbar !== true ) {
       this.updateScrollBar();
       // }
@@ -318,10 +319,35 @@ export class NgTableChartComponent implements OnInit {
     }
   }
 
+  cleanupListItems(keepScrollBar) {
+    //remove any remaining LI elements hanging out on the dom
+    var item, index;
+    for (var x = 0; x < this.totalItems.length; x++) {
+      item = this.totalItems[x];
+      index = item.rowIndex;
+      if (this.processedItems[index] === undefined) {
+        item.remove();
+      }
+    }
+    //cleanup totalItems array
+    var temp = [];
+    if (this.processedItems) {
+      for (index in this.processedItems) {
+        temp.push(this.processedItems[index]);
+      }
+    }
+    this.totalItems = temp;
+
+    // if (this.touchSupported && keepScrollBar !== true) {
+    //   this.$scrollbar.fadeTo(300, 0);
+    // }
+  }
+
   SCROLLBAR_BORDER = 1;
   SCROLLBAR_MIN_SIZE = 10;
 
   updateScrollBar() {
+    this.$scrollbar = document.getElementById('scrollbar');
     var height = this.$table.clientHeight;
     var maxScrollbarHeight = this.$table.clientHeight - (2 * this.SCROLLBAR_BORDER);
     var maxItemsHeight = (this.data.length) * this.itemHeight;
@@ -339,8 +365,9 @@ export class NgTableChartComponent implements OnInit {
     }
 
     // this.$scrollbar.height(actualHeight);
-    var parent = document.getElementById('scrollbar').parentElement;
+    var parent = this.$scrollbar.parentElement;
 
+    //if scrollbar is not needed
     if ((this.data.length * this.itemHeight) <= this.$table.clientHeight) {
       if (parent) {
         this.$scrollbar.remove();
@@ -348,9 +375,9 @@ export class NgTableChartComponent implements OnInit {
     }
     else {
       if (parent) {
-        this.$table.append(this.$scrollbar);
+        document.getElementById('table-container').append(this.$scrollbar);
       }
-      document.getElementById('scrollbar').style.top = scrollPosition.toString();
+      this.$scrollbar.style.top = scrollPosition.toString() + 'px';
     }
 
   }
@@ -361,9 +388,11 @@ export class NgTableChartComponent implements OnInit {
     var item;
     if (this.data === listItems) {
       item = document.createElement('tr');
-      const td = document.createElement('td');
-      td.innerHTML = listItems[i].columnA;
-      item.appendChild(td);
+      this.columnKeys.forEach(columnKey => {
+        const td = document.createElement('td');
+        td.innerHTML = listItems[i][columnKey];
+        item.appendChild(td);
+      });
     }
     else if (i !== undefined) {
       var iString = i.toString();
@@ -388,6 +417,7 @@ export class NgTableChartComponent implements OnInit {
   }
 
   onMouseWheel(event) {
+    console.log(document.getElementsByTagName('tr').length)
     // clearTimeout(this.cleanupTimeout);
 
     //only concerned about vertical scroll
